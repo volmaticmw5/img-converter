@@ -1,7 +1,6 @@
 import sys
 import os
 from PIL import Image
-#
 
 # Validate required arguments
 if len(sys.argv) < 3:
@@ -12,20 +11,30 @@ if len(sys.argv) < 3:
 convert_counter = 0
 source_dir = sys.argv[1]
 target_dir = sys.argv[2]
+format = "png"
+if len(sys.argv) > 3:
+    format = sys.argv[3]
 
-print('Converting all images inside source directory to png and exporting them in the output directory with the following configurations:')
+if format != "png" and format != "webp":
+    print('Unsupported format: ' + format)
+    print('Please specify a valid format: png, webp')
+    quit()
+
+print('Converting all images inside source directory to '+format+' and exporting them in the output directory with the following configurations:')
 print('Source directory: ', source_dir)
 print('Target output directory: ', target_dir)
 
-# Convert from targa to png
+# Convert from targa to desired format
 def convert(filename):
     global convert_counter
+    global format
+
     filepath_components = filename.split('/')
     filename_components = filepath_components[1].split('.') 
 
     if len(filepath_components) > 2:
         filename_components = filepath_components[len(filepath_components) - 1].split('.') 
-        filename_export = filepath_components[len(filepath_components) - len(filename_components)] + '/' + filename_components[0] + '.png'
+        filename_export = filepath_components[len(filepath_components) - len(filename_components)] + '/' + filename_components[0] + '.'+format+''
         folder_in_export = filepath_components[len(filepath_components) - 2]
 
         # Create dir if not exists in export
@@ -33,15 +42,15 @@ def convert(filename):
             os.mkdir(target_dir + '/' + folder_in_export)
 
         image = Image.open(filename)
-        image.save(target_dir + '/' + filename_export, compression=None)
+        image.save(target_dir + '/' + filename_export, compression=None, format=format)
 
-        print('Converted TGA from', filename , 'to PNG ('+ target_dir + '/' +filename_export+')')
+        print('Converted TGA from', filename , 'to '+format+' ('+ target_dir + '/' +filename_export+')')
         convert_counter+=1
     else:
         image = Image.open(filename)
-        image.save(target_dir + '/' +filename_components[0]+'.png', compression=None)
+        image.save(target_dir + '/' +filename_components[0]+'.'+format+'', compression=None, format=format)
 
-        print('Converted TGA from', filename , 'to PNG ('+ target_dir + '/' +filename_components[0]+'.png)')
+        print('Converted TGA from', filename , 'to '+format+' ('+ target_dir + '/' +filename_components[0]+'.'+format+')')
         convert_counter+=1
 
 # Loop through source directory files and sub directories
@@ -58,4 +67,4 @@ def convert_in_directory(dir):
 convert_in_directory(source_dir)
 
 print("#######################################")
-print("Done! Converted", convert_counter, "targa files to png!")
+print("Done! Converted", convert_counter, "targa files to "+format+"!")
